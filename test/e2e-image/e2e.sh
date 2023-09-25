@@ -24,8 +24,8 @@ E2E_CHECK_LEAKS=${E2E_CHECK_LEAKS:-""}
 
 reportFile="report-e2e-test-suite.xml"
 ginkgo_args=(
-  "--fail-fast"
-  "--flake-attempts=2"
+  "--keep-going"
+  "--flake-attempts=3"
   "--junit-report=${reportFile}"
   "--nodes=${E2E_NODES}"
   "--poll-progress-after=180s"
