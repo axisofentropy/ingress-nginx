@@ -19,6 +19,7 @@ set -o nounset
 set -o pipefail
 
 cleanup() {
+  sleep 120
   uffizzi cluster delete "${UFFIZZI_CLUSTER_NAME}"
 }
 
