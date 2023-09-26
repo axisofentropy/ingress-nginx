@@ -76,6 +76,7 @@ fi
 
 echo -e "Starting the e2e test pod"
 
+set -x
 kubectl run --rm \
   --attach \
   --restart=Never \
@@ -86,9 +87,11 @@ kubectl run --rm \
   --env="E2E_CHECK_LEAKS=${E2E_CHECK_LEAKS}" \
   --env="NGINX_BASE_IMAGE=${NGINX_BASE_IMAGE}" \
   --env="HTTPBUN_IMAGE=${HTTPBUN_IMAGE}" \
-  --overrides='{ "apiVersion": "v1", "spec":{"serviceAccountName": "ingress-nginx-e2e"}}' \
+  --override-type="strategic" \
+  --overrides='{ "apiVersion": "v1", "spec":{"serviceAccountName": "ingress-nginx-e2e", "containers":[{"name": "e2e", "resources": {"limits":{"cpu": 4, "memory": "16384Mi"}, "requests":{"cpu": 1, "memory": "4096Mi"}}}]}}' \
   --image-pull-policy="Always" \
   e2e --image="${E2E_TEST_IMAGE}"
+set +x
 
 # Get the junit-reports stored in the configMaps created during e2etests
 echo "Getting the report file out now.."
