@@ -20,7 +20,7 @@ set -o pipefail
 
 cleanup() {
   sleep 120
-  uffizzi cluster delete "${UFFIZZI_CLUSTER_NAME}"
+  #uffizzi cluster delete "${UFFIZZI_CLUSTER_NAME}"
 }
 
 DEBUG=${DEBUG:=false}
@@ -63,15 +63,18 @@ if [ "${SKIP_CLUSTER_CREATION}" = "false" ]; then
   # delete the cluster if it exists
   if uffizzi cluster list | grep "${UFFIZZI_CLUSTER_NAME}"; then
     uffizzi cluster delete "${UFFIZZI_CLUSTER_NAME}"
+    sleep 10
   fi
 
   uffizzi cluster create \
-    --name "${UFFIZZI_CLUSTER_NAME}" \
+    "${UFFIZZI_CLUSTER_NAME}" \
     --kubeconfig="${KUBECONFIG}" \
     --update-current-context
 
   echo "Kubernetes cluster:"
   kubectl get nodes -o wide
+
+  sleep 30
 fi
 
 if [ "${SKIP_INGRESS_IMAGE_CREATION}" = "false" ]; then
