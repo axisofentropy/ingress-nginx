@@ -24,15 +24,15 @@ E2E_CHECK_LEAKS=${E2E_CHECK_LEAKS:-""}
 
 reportFile="report-e2e-test-suite.xml"
 ginkgo_args=(
-  "--keep-going"
-  "--flake-attempts=3"
+  "--fail-fast"
+  "--flake-attempts=2"
   "--junit-report=${reportFile}"
   "--nodes=${E2E_NODES}"
   "--poll-progress-after=180s"
   "--randomize-all"
   "--show-node-events"
   "--succinct"
-  "--timeout=120m"
+  "--timeout=75m"
 )
 
 if [ -n "${FOCUS}" ]; then
