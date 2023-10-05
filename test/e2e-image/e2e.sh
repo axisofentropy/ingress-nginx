@@ -39,6 +39,10 @@ if [ -n "${FOCUS}" ]; then
   ginkgo_args+=("--focus=${FOCUS}")
 fi
 
+if [ -n "${SKIP}" ]; then
+  ginkgo_args+=("--skip=${SKIP}")
+fi
+
 if [ -z "${E2E_CHECK_LEAKS}" ]; then
   ginkgo_args+=("--skip=\[Memory Leak\]")
 fi
