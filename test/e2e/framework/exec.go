@@ -121,7 +121,18 @@ func (f *Framework) newIngressController(namespace, namespaceOverlay string) err
 	if !ok {
 		enableAnnotationValidations = "false"
 	}
-	cmd := exec.Command("./wait-for-nginx.sh", namespace, namespaceOverlay, isChroot, enableAnnotationValidations)
+
+	imageRepository, ok := os.LookupEnv("REPOSITORY")
+	if !ok {
+		imageRepository = "ingress-controller"
+	}
+
+	imageTag, ok := os.LookupEnv("TAG")
+	if !ok {
+		imageTag = "1.0.0-dev"
+	}
+
+	cmd := exec.Command("./wait-for-nginx.sh", namespace, namespaceOverlay, imageRepository, imageTag, isChroot, enableAnnotationValidations)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("unexpected error waiting for ingress controller deployment: %v.\nLogs:\n%v", err, string(out))
