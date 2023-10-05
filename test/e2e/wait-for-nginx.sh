@@ -66,7 +66,7 @@ if [[ ! -z "$NAMESPACE_OVERLAY" && -d "$DIR/namespace-overlays/$NAMESPACE_OVERLA
     helm install nginx-ingress ${DIR}/charts/ingress-nginx \
         --namespace=$NAMESPACE \
         --values "$DIR/namespace-overlays/$NAMESPACE_OVERLAY/values.yaml" \
-        --set "image.repository=$REPOSITORY,image.tag=$TAG"
+        --set-string "controller.image.repository=$REPOSITORY,controller.image.tag=$TAG"
 else
     cat << EOF | helm install nginx-ingress ${DIR}/charts/ingress-nginx --namespace=$NAMESPACE --values -
 # TODO: remove the need to use fullnameOverride
