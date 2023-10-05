@@ -83,6 +83,8 @@ kubectl run --rm \
   --env="E2E_NODES=${E2E_NODES}" \
   --env="FOCUS=${FOCUS}" \
   --env="IS_CHROOT=${IS_CHROOT:-false}"\
+  --env="REPOSITORY=${REPOSITORY:-ingress-controller}"\
+  --env="TAG=${TAG:-1.0.0-dev}"\
   --env="ENABLE_VALIDATIONS=${ENABLE_VALIDATIONS:-false}"\
   --env="E2E_CHECK_LEAKS=${E2E_CHECK_LEAKS}" \
   --env="NGINX_BASE_IMAGE=${NGINX_BASE_IMAGE}" \

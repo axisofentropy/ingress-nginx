@@ -23,8 +23,10 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 export NAMESPACE=$1
 export NAMESPACE_OVERLAY=$2
-export IS_CHROOT=$3
-export ENABLE_VALIDATIONS=$4
+export REPOSITORY=$3
+export TAG=$4
+export IS_CHROOT=$5
+export ENABLE_VALIDATIONS=$6
 
 echo "deploying NGINX Ingress controller in namespace $NAMESPACE"
 
@@ -63,18 +65,18 @@ if [[ ! -z "$NAMESPACE_OVERLAY" && -d "$DIR/namespace-overlays/$NAMESPACE_OVERLA
     echo "Namespace overlay $NAMESPACE_OVERLAY is being used for namespace $NAMESPACE"
     helm install nginx-ingress ${DIR}/charts/ingress-nginx \
         --namespace=$NAMESPACE \
-	--timeout="15m" \
-        --values "$DIR/namespace-overlays/$NAMESPACE_OVERLAY/values.yaml"
+        --values "$DIR/namespace-overlays/$NAMESPACE_OVERLAY/values.yaml" \
+        --set "image.repository=$REPOSITORY,image.tag=$TAG"
 else
-    cat << EOF | helm install nginx-ingress ${DIR}/charts/ingress-nginx --timeout=15m --namespace=$NAMESPACE --values -
+    cat << EOF | helm install nginx-ingress ${DIR}/charts/ingress-nginx --namespace=$NAMESPACE --values -
 # TODO: remove the need to use fullnameOverride
 fullnameOverride: nginx-ingress
 controller:
   enableAnnotationValidations: ${ENABLE_VALIDATIONS}
   image:
-    repository: registry.uffizzi.com/controller
+    repository: "${REPOSITORY}"
     chroot: ${IS_CHROOT}
-    tag: 1.0.0-dev
+    tag: "${TAG}"
     digest:
     digestChroot:
   scope:

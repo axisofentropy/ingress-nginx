@@ -31,17 +31,26 @@ else
   trap cleanup EXIT
 fi
 
+if [ -n "${GITHUB_RUN_ID}" ]; then
+  echo "using GITHUB_RUN_ID $GITHUB_RUN_ID for unique identifiers."
+  export TAG="${GITHUB_RUN_ID}"
+  export UFFIZZI_CLUSTER_NAME=${UFFIZZI_CLUSTER_NAME:-$GITHUB_RUN_ID}
+  export E2E_TEST_IMAGE="${E2E_TEST_IMAGE:-registry.uffizzi.com/nginx-ingress-controller:$GITHUB_RUN_ID}"
+else
+  # Use 1.0.0-dev to make sure we use the latest configuration in the helm template
+  export TAG=1.0.0-dev #TODO: more unique
+  export UFFIZZI_CLUSTER_NAME=${UFFIZZI_CLUSTER_NAME:-ingress-nginx-dev}
+  export E2E_TEST_IMAGE="${E2E_TEST_IMAGE:-registry.uffizzi.com/nginx-ingress-controller:e2e}"
+fi
+
 IS_CHROOT="${IS_CHROOT:-false}"
 ENABLE_VALIDATIONS="${ENABLE_VALIDATIONS:-false}"
-export UFFIZZI_CLUSTER_NAME=${UFFIZZI_CLUSTER_NAME:-ingress-nginx-dev}
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-# Use 1.0.0-dev to make sure we use the latest configuration in the helm template
-export TAG=1.0.0-dev #TODO: more unique
 export ARCH=${ARCH:-amd64}
+export REPOSITORY=registry.uffizzi.com/controller
 export REGISTRY=registry.uffizzi.com
 NGINX_BASE_IMAGE=$(cat "$DIR"/../../NGINX_BASE)
 export NGINX_BASE_IMAGE=$NGINX_BASE_IMAGE
-export E2E_TEST_IMAGE="${E2E_TEST_IMAGE:-registry.uffizzi.com/nginx-ingress-controller:e2e}"
 export DOCKER_CLI_EXPERIMENTAL=enabled
 export KUBECONFIG="${KUBECONFIG:-$HOME/.kube/uffizzi-config-$UFFIZZI_CLUSTER_NAME}"
 SKIP_INGRESS_IMAGE_CREATION="${SKIP_INGRESS_IMAGE_CREATION:-false}"
@@ -81,12 +90,13 @@ if [ "${SKIP_INGRESS_IMAGE_CREATION}" = "false" ]; then
   echo "[dev-env] building image"
   if [ "${IS_CHROOT}" = "true" ]; then
     make -C "${DIR}"/../../ clean-image build image-chroot
-    docker tag ${REGISTRY}/controller-chroot:${TAG} ${REGISTRY}/controller:${TAG}
+    docker tag ${REGISTRY}/controller-chroot:${TAG} ${REPOSITORY}:${TAG}
   else
     make -C "${DIR}"/../../ clean-image build image
+    docker tag ${REGISTRY}/controller:${TAG} ${REPOSITORY}:${TAG}
   fi
 
-  docker push ${REGISTRY}/controller:${TAG}
+  docker push ${REPOSITORY}:${TAG}
   echo "[dev-env] .. done building controller images"
 fi
 
@@ -100,13 +110,12 @@ if [ "${SKIP_E2E_IMAGE_CREATION}" = "false" ]; then
   make -C "${DIR}"/../e2e-image image
   echo "[dev-env] ..done building e2e-image"
 
-  #docker tag nginx-ingress-controller:e2e "${E2E_TEST_IMAGE}"
   docker push "${E2E_TEST_IMAGE}"
 fi
 
 # Preload images used in e2e tests
 echo "[dev-env] copying docker images to registry..."
 
-#docker push "${REGISTRY}"/controller:"${TAG}"
+#docker push "${REPOSITORY}"/controller:"${TAG}"
 echo "[dev-env] running e2e tests..."
 make -C "${DIR}"/../../ e2e-test
