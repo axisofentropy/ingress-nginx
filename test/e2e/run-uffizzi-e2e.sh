@@ -15,12 +15,12 @@
 # limitations under the License.
 
 set -o errexit
-set -o nounset
 set -o pipefail
 
 cleanup() {
-  sleep 120
-  #uffizzi cluster delete "${UFFIZZI_CLUSTER_NAME}"
+  if [ "${SKIP_CLUSTER_CREATION}" = "false" ]; then
+    uffizzi cluster delete "${UFFIZZI_CLUSTER_NAME}"
+  fi
 }
 
 DEBUG=${DEBUG:=false}
@@ -42,6 +42,8 @@ else
   export UFFIZZI_CLUSTER_NAME=${UFFIZZI_CLUSTER_NAME:-ingress-nginx-dev}
   export E2E_TEST_IMAGE="${E2E_TEST_IMAGE:-registry.uffizzi.com/nginx-ingress-controller:e2e}"
 fi
+
+set -o nounset
 
 IS_CHROOT="${IS_CHROOT:-false}"
 ENABLE_VALIDATIONS="${ENABLE_VALIDATIONS:-false}"
