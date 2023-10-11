@@ -91,7 +91,7 @@ kubectl run --rm \
   --env="NGINX_BASE_IMAGE=${NGINX_BASE_IMAGE}" \
   --env="HTTPBUN_IMAGE=${HTTPBUN_IMAGE}" \
   --override-type="strategic" \
-  --overrides='{ "apiVersion": "v1", "spec":{"serviceAccountName": "ingress-nginx-e2e", "containers":[{"name": "e2e", "resources": {"limits":{"cpu": 4, "memory": "16384Mi"}, "requests":{"cpu": 1, "memory": "4096Mi"}}}]}}' \
+  --overrides='{ "apiVersion": "v1", "spec":{"serviceAccountName": "ingress-nginx-e2e", "containers":[{"name": "e2e", "resources": {"limits":{"cpu": 4, "memory": "12288Mi"}, "requests":{"cpu": 1, "memory": "4096Mi"}}}]}}' \
   --image-pull-policy="Always" \
   e2e --image="${E2E_TEST_IMAGE}"
 set +x

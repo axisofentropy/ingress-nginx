@@ -21,7 +21,6 @@ controller:
     initialDelaySeconds: 1
   livenessProbe:
     port: 9090
-    initialDelaySeconds: 1
   service:
     type: NodePort
   admissionWebhooks:

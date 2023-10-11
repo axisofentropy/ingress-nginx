@@ -87,7 +87,6 @@ controller:
     initialDelaySeconds: 3
     periodSeconds: 1
   livenessProbe:
-    initialDelaySeconds: 3
     periodSeconds: 1
   service:
     type: NodePort

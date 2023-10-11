@@ -79,7 +79,7 @@ func smugglingRequest(host, addr string, port int) (string, error) {
 
 	defer conn.Close()
 
-	if err := conn.SetDeadline(time.Now().Add(time.Second * 10)); err != nil {
+	if err := conn.SetDeadline(time.Now().Add(time.Second * 30)); err != nil {
 		return "", err
 	}
 
