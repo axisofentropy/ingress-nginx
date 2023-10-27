@@ -71,7 +71,7 @@ fullnameOverride: nginx-ingress
 controller:
   enableAnnotationValidations: ${ENABLE_VALIDATIONS}
   image:
-    repository: ingress-controller/controller
+    repository: registry.uffizzi.com/controller
     chroot: ${IS_CHROOT}
     tag: 1.0.0-dev
     digest:
@@ -104,14 +104,14 @@ controller:
   # mkdir -p /tmp/coredump
   # chmod a+rwx /tmp/coredump
   # echo "/tmp/coredump/core.%e.%p.%h.%t" > /proc/sys/kernel/core_pattern
-  extraVolumeMounts:
-    - name: coredump
-      mountPath: /tmp/coredump
+  # extraVolumeMounts:
+  #   - name: coredump
+  #     mountPath: /tmp/coredump
 
-  extraVolumes:
-    - name: coredump
-      hostPath:
-        path: /tmp/coredump
+  # extraVolumes:
+  #   - name: coredump
+  #     hostPath:
+  #       path: /tmp/coredump
 
 ${OTEL_MODULE}
 
