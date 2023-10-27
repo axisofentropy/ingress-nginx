@@ -52,7 +52,7 @@ fi
 BASEDIR=$(dirname "$0")
 NGINX_BASE_IMAGE=$(cat $BASEDIR/../../NGINX_BASE)
 HTTPBUN_IMAGE=$(cat $BASEDIR/HTTPBUN_IMAGE)
-E2E_IMAGE="${E2E_IMAGE:-nginx-ingress-controller:e2e}"
+E2E_TEST_IMAGE="${E2E_TEST_IMAGE:-nginx-ingress-controller:e2e}"
 
 echo -e "${BGREEN}Granting permissions to ingress-nginx e2e service account...${NC}"
 kubectl create serviceaccount ingress-nginx-e2e || true
@@ -84,7 +84,8 @@ kubectl run --rm \
   --env="NGINX_BASE_IMAGE=${NGINX_BASE_IMAGE}" \
   --env="HTTPBUN_IMAGE=${HTTPBUN_IMAGE}" \
   --overrides='{ "apiVersion": "v1", "spec":{"serviceAccountName": "ingress-nginx-e2e"}}' \
-  e2e --image="${E2E_IMAGE}"
+  --image-pull-policy="Always" \
+  e2e --image="${E2E_TEST_IMAGE}"
 
 # Get the junit-reports stored in the configMaps created during e2etests
 echo "Getting the report file out now.."

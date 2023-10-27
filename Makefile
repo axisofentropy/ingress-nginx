@@ -164,6 +164,10 @@ e2e-test:  ## Run e2e tests (expects access to a working Kubernetes cluster).
 kind-e2e-test:  ## Run e2e tests using kind.
 	@test/e2e/run-kind-e2e.sh
 
+.PHONY: uffizzi-e2e-test
+uffizzi-e2e-test:  ## Run e2e tests using uffizzi.
+	@test/e2e/run-uffizzi-e2e.sh
+
 .PHONY: kind-e2e-chart-tests
 kind-e2e-chart-tests: ## Run helm chart e2e tests
 	@test/e2e/run-chart-test.sh
