@@ -59,14 +59,14 @@ SKIP_INGRESS_IMAGE_CREATION="${SKIP_INGRESS_IMAGE_CREATION:-false}"
 SKIP_E2E_IMAGE_CREATION="${SKIP_E2E_IMAGE_CREATION:=false}"
 SKIP_CLUSTER_CREATION="${SKIP_CLUSTER_CREATION:-false}"
 
-if ! command -v uffizzi version &> /dev/null; then
-  echo "uffizzi CLI is not installed. Visit the official site https://docs.uffizzi.com/install/"
-  exit 1
-fi
-
 echo "Running e2e with nginx base image ${NGINX_BASE_IMAGE}"
 
 if [ "${SKIP_CLUSTER_CREATION}" = "false" ]; then
+  if ! command -v uffizzi version &> /dev/null; then
+    echo "uffizzi CLI is not installed. Visit the official site https://docs.uffizzi.com/install/"
+    exit 1
+  fi
+
   echo "[dev-env] creating Kubernetes cluster with Uffizzi"
 
   export K8S_VERSION=${K8S_VERSION:-v1.26.3@sha256:61b92f38dff6ccc29969e7aa154d34e38b89443af1a2c14e6cfbd2df6419c66f}
