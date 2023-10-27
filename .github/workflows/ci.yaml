@@ -137,10 +137,9 @@ jobs:
             | gzip > docker.tar.gz
 
           echo "pushing images..."
-          docker push \
-            ${E2E_TEST_IMAGE} \
-            ${REGISTRY}/controller:${TAG} \
-            ${REGISTRY}/controller-chroot:${TAG}
+          docker push ${E2E_TEST_IMAGE}
+          docker push ${REGISTRY}/controller:${TAG}
+          docker push ${REGISTRY}/controller-chroot:${TAG}
 
       - name: cache
         uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
