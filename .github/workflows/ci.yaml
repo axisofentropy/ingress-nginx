@@ -274,7 +274,7 @@ jobs:
           name: e2e-test-reports-${{ matrix.k8s }}
           path: 'test/junitreports/report*.xml'
 
-      - name: Create Uffizzi ${{ matrix.k8s }} Cluster
+      - name: Delete Uffizzi ${{ matrix.k8s }} Cluster
         uses: UffizziCloud/cluster-action@main
         if: success() || failure()
         with:
@@ -330,7 +330,7 @@ jobs:
           name: e2e-test-reports-${{ matrix.k8s }}
           path: 'test/junitreports/report*.xml'
 
-      - name: Create Uffizzi ${{ matrix.k8s }} Cluster
+      - name: Delete Uffizzi ${{ matrix.k8s }} Cluster
         uses: UffizziCloud/cluster-action@main
         if: success() || failure()
         with:
@@ -386,7 +386,7 @@ jobs:
           name: e2e-test-reports-chroot-${{ matrix.k8s }}
           path: 'test/junitreports/report*.xml'
 
-      - name: Create Uffizzi ${{ matrix.k8s }} Cluster
+      - name: Delete Uffizzi ${{ matrix.k8s }} Cluster
         uses: UffizziCloud/cluster-action@main
         if: success() || failure()
         with:
