@@ -137,8 +137,11 @@ jobs:
             | gzip > docker.tar.gz
 
           echo "pushing images..."
+          echo docker push ${E2E_TEST_IMAGE}
           docker push ${E2E_TEST_IMAGE}
+          echo docker push ${REGISTRY}/controller:${TAG}
           docker push ${REGISTRY}/controller:${TAG}
+          echo docker push ${REGISTRY}/controller-chroot:${TAG}
           docker push ${REGISTRY}/controller-chroot:${TAG}
 
       - name: cache
