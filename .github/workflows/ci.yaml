@@ -29,10 +29,10 @@ permissions:
   contents: read
 
 env:
-  TAG: ${GITHUB_SHA}
+  TAG: ${{ github.sha }}
   ARCH: amd64
   REGISTRY: registry.uffizzi.com
-  E2E_TEST_IMAGE: registry.uffizzi.com/nginx-ingress-e2e:${GITHUB_SHA}
+  E2E_TEST_IMAGE: registry.uffizzi.com/nginx-ingress-e2e:${{ github.sha }}
 
 jobs:
 
