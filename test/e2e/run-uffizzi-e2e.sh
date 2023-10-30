@@ -33,12 +33,12 @@ fi
 
 if [ -n "${GITHUB_RUN_ID}" ]; then
   echo "using GITHUB_RUN_ID $GITHUB_RUN_ID for unique identifiers."
-  export TAG="${GITHUB_RUN_ID}"
+  export TAG="${TAG:-$GITHUB_RUN_ID}"
   export UFFIZZI_CLUSTER_NAME=${UFFIZZI_CLUSTER_NAME:-$GITHUB_RUN_ID}
   export E2E_TEST_IMAGE="${E2E_TEST_IMAGE:-registry.uffizzi.com/nginx-ingress-controller:$GITHUB_RUN_ID}"
 else
   # Use 1.0.0-dev to make sure we use the latest configuration in the helm template
-  export TAG=1.0.0-dev #TODO: more unique
+  export TAG="${TAG:-1.0.0-dev}" #TODO: more unique
   export UFFIZZI_CLUSTER_NAME=${UFFIZZI_CLUSTER_NAME:-ingress-nginx-dev}
   export E2E_TEST_IMAGE="${E2E_TEST_IMAGE:-registry.uffizzi.com/nginx-ingress-controller:e2e}"
 fi
