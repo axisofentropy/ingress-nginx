@@ -238,6 +238,7 @@ jobs:
       id-token: write
 
     strategy:
+      fail-fast: false
       matrix:
         include:
         - k8s: "1.25"
@@ -296,6 +297,7 @@ jobs:
       id-token: write
 
     strategy:
+      fail-fast: false
       matrix:
         include:
         - k8s: "1.25"
@@ -355,6 +357,7 @@ jobs:
       id-token: write
 
     strategy:
+      fail-fast: false
       matrix:
         include:
         - k8s: "1.25"
