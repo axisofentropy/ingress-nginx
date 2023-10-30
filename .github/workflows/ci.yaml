@@ -278,7 +278,8 @@ jobs:
 
       - name: Delete Uffizzi ${{ matrix.k8s }} Cluster
         uses: UffizziCloud/cluster-action@main
-        if: success() || failure()
+        if: always()
+        timeout-minutes: 15
         with:
           cluster-name: k8s-${{ matrix.name }}-${{ github.run_id }}-${{ github.run_attempt }}
           action: delete
@@ -336,7 +337,8 @@ jobs:
 
       - name: Delete Uffizzi ${{ matrix.k8s }} Cluster
         uses: UffizziCloud/cluster-action@main
-        if: success() || failure()
+        if: always()
+        timeout-minutes: 15
         with:
           cluster-name: k8s-validations-${{ matrix.name }}-${{ github.run_id }}-${{ github.run_attempt }}
           action: delete
@@ -394,7 +396,8 @@ jobs:
 
       - name: Delete Uffizzi ${{ matrix.k8s }} Cluster
         uses: UffizziCloud/cluster-action@main
-        if: success() || failure()
+        if: always()
+        timeout-minutes: 15
         with:
           cluster-name: k8s-chroot-${{ matrix.name }}-${{ github.run_id }}-${{ github.run_attempt }}
           action: delete
