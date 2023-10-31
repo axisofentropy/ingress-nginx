@@ -247,8 +247,8 @@ jobs:
           name: "1-26"
         - k8s: "1.27"
           name: "1-27"
-        - k8s: "1.29"
-          name: "1-29"
+        - k8s: "1.28"
+          name: "1-28"
 
     steps:
       - name: Checkout
@@ -306,8 +306,8 @@ jobs:
           name: "1-26"
         - k8s: "1.27"
           name: "1-27"
-        - k8s: "1.29"
-          name: "1-29"
+        - k8s: "1.28"
+          name: "1-28"
 
     steps:
       - name: Checkout
@@ -366,8 +366,8 @@ jobs:
           name: "1-26"
         - k8s: "1.27"
           name: "1-27"
-        - k8s: "1.29"
-          name: "1-29"
+        - k8s: "1.28"
+          name: "1-28"
 
     steps:
       - name: Checkout
