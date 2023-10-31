@@ -255,7 +255,7 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Create Uffizzi ${{ matrix.k8s }} Cluster
-        uses: UffizziCloud/cluster-action@main
+        uses: UffizziCloud/cluster-action@k8s_version
         with:
           cluster-name: k8s-${{ matrix.name }}-${{ github.run_id }}-${{ github.run_attempt }}
           kubeconfig: ${{ github.workspace }}/kubeconfig
@@ -278,7 +278,7 @@ jobs:
           path: 'test/junitreports/report*.xml'
 
       - name: Delete Uffizzi ${{ matrix.k8s }} Cluster
-        uses: UffizziCloud/cluster-action@main
+        uses: UffizziCloud/cluster-action@k8s_version
         if: always()
         timeout-minutes: 15
         with:
@@ -314,7 +314,7 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Create Uffizzi ${{ matrix.k8s }} Cluster
-        uses: UffizziCloud/cluster-action@main
+        uses: UffizziCloud/cluster-action@k8s_version
         with:
           cluster-name: k8s-validations-${{ matrix.name }}-${{ github.run_id }}-${{ github.run_attempt }}
           kubeconfig: ${{ github.workspace }}/kubeconfig
@@ -338,7 +338,7 @@ jobs:
           path: 'test/junitreports/report*.xml'
 
       - name: Delete Uffizzi ${{ matrix.k8s }} Cluster
-        uses: UffizziCloud/cluster-action@main
+        uses: UffizziCloud/cluster-action@k8s_version
         if: always()
         timeout-minutes: 15
         with:
@@ -374,7 +374,7 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Create Uffizzi ${{ matrix.k8s }} Cluster
-        uses: UffizziCloud/cluster-action@main
+        uses: UffizziCloud/cluster-action@k8s_version
         with:
           cluster-name: k8s-chroot-${{ matrix.name }}-${{ github.run_id }}-${{ github.run_attempt }}
           kubeconfig: ${{ github.workspace }}/kubeconfig
@@ -398,7 +398,7 @@ jobs:
           path: 'test/junitreports/report*.xml'
 
       - name: Delete Uffizzi ${{ matrix.k8s }} Cluster
-        uses: UffizziCloud/cluster-action@main
+        uses: UffizziCloud/cluster-action@k8s_version
         if: always()
         timeout-minutes: 15
         with:
