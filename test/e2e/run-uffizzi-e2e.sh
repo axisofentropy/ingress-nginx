@@ -49,7 +49,11 @@ IS_CHROOT="${IS_CHROOT:-false}"
 ENABLE_VALIDATIONS="${ENABLE_VALIDATIONS:-false}"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export ARCH=${ARCH:-amd64}
-export REPOSITORY=registry.uffizzi.com/controller
+if [ "${IS_CHROOT}" = "true" ]; then
+  export REPOSITORY=registry.uffizzi.com/controller-chroot
+else
+  export REPOSITORY=registry.uffizzi.com/controller
+fi
 export REGISTRY=registry.uffizzi.com
 NGINX_BASE_IMAGE=$(cat "$DIR"/../../NGINX_BASE)
 export NGINX_BASE_IMAGE=$NGINX_BASE_IMAGE
@@ -97,9 +101,10 @@ if [ "${SKIP_INGRESS_IMAGE_CREATION}" = "false" ]; then
     make -C "${DIR}"/../../ clean-image build image
     docker tag ${REGISTRY}/controller:${TAG} ${REPOSITORY}:${TAG}
   fi
-
-  docker push ${REPOSITORY}:${TAG}
   echo "[dev-env] .. done building controller images"
+
+  echo "[dev-env] copying docker images to registry..."
+  docker push ${REPOSITORY}:${TAG}
 fi
 
 if [ "${SKIP_E2E_IMAGE_CREATION}" = "false" ]; then
@@ -115,9 +120,5 @@ if [ "${SKIP_E2E_IMAGE_CREATION}" = "false" ]; then
   docker push "${E2E_TEST_IMAGE}"
 fi
 
-# Preload images used in e2e tests
-echo "[dev-env] copying docker images to registry..."
-
-#docker push "${REPOSITORY}"/controller:"${TAG}"
 echo "[dev-env] running e2e tests..."
 make -C "${DIR}"/../../ e2e-test
