@@ -74,8 +74,7 @@ fi
 echo -e "Starting the e2e test pod"
 
 set -x
-kubectl run --rm \
-  --attach \
+kubectl run \
   --restart=Never \
   --env="E2E_NODES=${E2E_NODES}" \
   --env="FOCUS=${FOCUS}" \
@@ -91,9 +90,18 @@ kubectl run --rm \
   --overrides='{ "apiVersion": "v1", "spec":{"serviceAccountName": "ingress-nginx-e2e", "containers":[{"name": "e2e", "resources": {"limits":{"cpu": 4, "memory": "12288Mi"}, "requests":{"cpu": 1, "memory": "4096Mi"}}}]}}' \
   --image-pull-policy="Always" \
   --v=8 \
-  e2e --image="${E2E_TEST_IMAGE}"
-echo kubectl run exit code $?
+  --image="${E2E_TEST_IMAGE}" \
+  e2e
 set +x
+echo kubectl run exit code $?
+
+kubectl wait --for=condition=ready=true pod/e2e --timeout=10m --v=2
+echo e2e Pod Ready
+kubectl wait --for=condition=ready=false pod/e2e --timeout=2h --v=8
+echo e2e Pod Unready
+
+echo dumping logs from e2e test runner Pod:
+kubectl logs e2e
 
 # Get the junit-reports stored in the configMaps created during e2etests
 echo "Getting the report file out now.."

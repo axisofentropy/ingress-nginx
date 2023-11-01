@@ -78,7 +78,6 @@ if [ "${SKIP_CLUSTER_CREATION}" = "false" ]; then
   # delete the cluster if it exists
   if uffizzi cluster list | grep "${UFFIZZI_CLUSTER_NAME}"; then
     uffizzi cluster delete "${UFFIZZI_CLUSTER_NAME}"
-    sleep 10
   fi
 
   uffizzi cluster create \
