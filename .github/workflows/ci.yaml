@@ -260,6 +260,7 @@ jobs:
           cluster-name: k8s-${{ matrix.name }}-${{ github.run_id }}-${{ github.run_attempt }}
           kubeconfig: ${{ github.workspace }}/kubeconfig
           k8s-version: ${{ matrix.k8s }}
+          server: https://app.qa-gke.uffizzi.com/
 
       - name: Run e2e tests
         env:
@@ -285,6 +286,7 @@ jobs:
         with:
           cluster-name: k8s-${{ matrix.name }}-${{ github.run_id }}-${{ github.run_attempt }}
           action: delete
+          server: https://app.qa-gke.uffizzi.com/
 
   kubernetes-validations:
     name: Kubernetes with Validations
@@ -320,6 +322,7 @@ jobs:
           cluster-name: k8s-validations-${{ matrix.name }}-${{ github.run_id }}-${{ github.run_attempt }}
           kubeconfig: ${{ github.workspace }}/kubeconfig
           k8s-version: ${{ matrix.k8s }}
+          server: https://app.qa-gke.uffizzi.com/
 
       - name: Run e2e tests
         env:
@@ -346,6 +349,7 @@ jobs:
         with:
           cluster-name: k8s-validations-${{ matrix.name }}-${{ github.run_id }}-${{ github.run_attempt }}
           action: delete
+          server: https://app.qa-gke.uffizzi.com/
 
   kubernetes-chroot:
     name: Kubernetes chroot
@@ -381,6 +385,7 @@ jobs:
           cluster-name: k8s-chroot-${{ matrix.name }}-${{ github.run_id }}-${{ github.run_attempt }}
           kubeconfig: ${{ github.workspace }}/kubeconfig
           k8s-version: ${{ matrix.k8s }}
+          server: https://app.qa-gke.uffizzi.com/
 
       - name: Run e2e tests
         env:
@@ -406,6 +411,7 @@ jobs:
         with:
           cluster-name: k8s-chroot-${{ matrix.name }}-${{ github.run_id }}-${{ github.run_attempt }}
           action: delete
+          server: https://app.qa-gke.uffizzi.com/
 
   test-nginx-image-build:
     permissions:
