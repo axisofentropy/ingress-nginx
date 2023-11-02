@@ -135,10 +135,12 @@ jobs:
           docker push ${REGISTRY}/controller-chroot:${TAG}
 
           echo "creating images cache..."
+          docker tag ${E2E_TEST_IMAGE} nginx-ingress-controller:e2e
           docker tag ${REGISTRY}/controller:${TAG} ingress-controller/controller:1.0.0-dev
           docker tag ${REGISTRY}/controller-chroot:${TAG} ingress-controller/controller-chroot:1.0.0-dev
           docker save \
             ${E2E_TEST_IMAGE} \
+            nginx-ingress-controller:e2e \
             ${REGISTRY}/controller:${TAG} \
             ingress-controller/controller:1.0.0-dev \
             ${REGISTRY}/controller-chroot:${TAG} \
@@ -386,6 +388,7 @@ jobs:
           KIND_CLUSTER_NAME: kind
           SKIP_CLUSTER_CREATION: true
           SKIP_IMAGE_CREATION: true
+          SKIP_E2E_IMAGE_CREATION: true
           IS_CHROOT: true
         run: |
           kind get kubeconfig > $HOME/.kube/kind-config-kind
