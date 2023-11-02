@@ -129,20 +129,21 @@ jobs:
           make clean-image build image image-chroot
           make -C test/e2e-image image
 
+          echo "pushing images..."
+          docker push ${E2E_TEST_IMAGE}
+          docker push ${REGISTRY}/controller:${TAG}
+          docker push ${REGISTRY}/controller-chroot:${TAG}
+
           echo "creating images cache..."
+          docker tag ${REGISTRY}/controller:${TAG} ingress-controller/controller:1.0.0-dev
+          docker tag ${REGISTRY}/controller-chroot:${TAG} ingress-controller/controller-chroot:1.0.0-dev
           docker save \
             ${E2E_TEST_IMAGE} \
             ${REGISTRY}/controller:${TAG} \
+            ingress-controller/controller:1.0.0-dev \
             ${REGISTRY}/controller-chroot:${TAG} \
+            ingress-controller/controller-chroot:1.0.0-dev \
             | gzip > docker.tar.gz
-
-          echo "pushing images..."
-          echo docker push ${E2E_TEST_IMAGE}
-          docker push ${E2E_TEST_IMAGE}
-          echo docker push ${REGISTRY}/controller:${TAG}
-          docker push ${REGISTRY}/controller:${TAG}
-          echo docker push ${REGISTRY}/controller-chroot:${TAG}
-          docker push ${REGISTRY}/controller-chroot:${TAG}
 
       - name: cache
         uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
@@ -355,42 +356,40 @@ jobs:
       - build
     if: |
       (needs.changes.outputs.go == 'true') || ${{ inputs.run_e2e }}
-    permissions:
-      id-token: write
 
     strategy:
-      fail-fast: false
       matrix:
-        include:
-        - k8s: "1.25"
-          name: "1-25"
-        - k8s: "1.26"
-          name: "1-26"
-        - k8s: "1.27"
-          name: "1-27"
-        - k8s: "1.28"
-          name: "1-28"
+        k8s: [v1.25.11, v1.26.6, v1.27.3, v1.28.0]
 
     steps:
+
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
-      - name: Create Uffizzi ${{ matrix.k8s }} Cluster
-        uses: UffizziCloud/cluster-action@main
+      - name: cache
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
         with:
-          cluster-name: k8s-chroot-${{ matrix.name }}-${{ github.run_id }}-${{ github.run_attempt }}
-          kubeconfig: ${{ github.workspace }}/kubeconfig
-          k8s-version: ${{ matrix.k8s }}
+          name: docker.tar.gz
+
+      - name: Create Kubernetes ${{ matrix.k8s }} cluster
+        id: kind
+        run: |
+          kind create cluster --image=kindest/node:${{ matrix.k8s }} --config test/e2e/kind.yaml
+
+      - name: Load images from cache
+        run: |
+          echo "loading docker images..."
+          gzip -dc docker.tar.gz | docker load
 
       - name: Run e2e tests
         env:
+          KIND_CLUSTER_NAME: kind
           SKIP_CLUSTER_CREATION: true
-          SKIP_INGRESS_IMAGE_CREATION: true
-          SKIP_E2E_IMAGE_CREATION: true
-          KUBECONFIG: ${{ github.workspace }}/kubeconfig
+          SKIP_IMAGE_CREATION: true
           IS_CHROOT: true
         run: |
-          make uffizzi-e2e-test
+          kind get kubeconfig > $HOME/.kube/kind-config-kind
+          make kind-e2e-test
 
       - name: Upload e2e junit-reports
         uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
@@ -398,14 +397,6 @@ jobs:
         with:
           name: e2e-test-reports-chroot-${{ matrix.k8s }}
           path: 'test/junitreports/report*.xml'
-
-      - name: Delete Uffizzi ${{ matrix.k8s }} Cluster
-        uses: UffizziCloud/cluster-action@main
-        if: always()
-        timeout-minutes: 15
-        with:
-          cluster-name: k8s-chroot-${{ matrix.name }}-${{ github.run_id }}-${{ github.run_attempt }}
-          action: delete
 
   test-nginx-image-build:
     permissions:
