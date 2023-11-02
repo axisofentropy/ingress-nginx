@@ -806,7 +806,7 @@ func newSingleIngress(name, ns string, annotations map[string]string, spec netwo
 
 // defaultWaitDuration default sleep time for operations related
 // to the API server and NGINX reloads.
-var defaultWaitDuration = 10 * time.Second
+var defaultWaitDuration = 9 * time.Second
 
 // Sleep pauses the current goroutine for at least the duration d.
 // If no duration is defined, it uses a default
