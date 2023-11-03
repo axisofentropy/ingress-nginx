@@ -239,6 +239,8 @@ jobs:
       (needs.changes.outputs.go == 'true') || ${{ inputs.run_e2e }}
     permissions:
       id-token: write
+    env:
+      E2E_NODES: 70
 
     strategy:
       fail-fast: false
@@ -301,6 +303,8 @@ jobs:
       (needs.changes.outputs.go == 'true') || ${{ inputs.run_e2e }}
     permissions:
       id-token: write
+    env:
+      E2E_NODES: 70
 
     strategy:
       fail-fast: false
