@@ -89,7 +89,7 @@ kubectl run \
   --override-type="strategic" \
   --overrides='{ "apiVersion": "v1", "spec":{"serviceAccountName": "ingress-nginx-e2e", "containers":[{"name": "e2e", "resources": {"limits":{"cpu": 4, "memory": "12288Mi"}, "requests":{"cpu": 1, "memory": "4096Mi"}}}]}}' \
   --image-pull-policy="Always" \
-  --v=8 \
+  --v=2 \
   --image="${E2E_TEST_IMAGE}" \
   e2e
 set +x
@@ -97,7 +97,7 @@ echo kubectl run exit code $?
 
 kubectl wait --for=condition=ready=true pod/e2e --timeout=10m --v=2
 echo e2e Pod Ready
-kubectl wait --for=condition=ready=false pod/e2e --timeout=2h --v=8
+kubectl wait --for=condition=ready=false pod/e2e --timeout=2h --v=2
 echo e2e Pod Unready
 
 echo dumping logs from e2e test runner Pod:
