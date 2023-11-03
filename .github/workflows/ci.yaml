@@ -240,7 +240,7 @@ jobs:
     permissions:
       id-token: write
     env:
-      E2E_NODES: 70
+      E2E_NODES: 35
 
     strategy:
       fail-fast: false
@@ -304,7 +304,7 @@ jobs:
     permissions:
       id-token: write
     env:
-      E2E_NODES: 70
+      E2E_NODES: 35
 
     strategy:
       fail-fast: false
