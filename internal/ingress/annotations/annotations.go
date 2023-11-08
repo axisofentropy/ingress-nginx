@@ -20,6 +20,7 @@ import (
 	"dario.cat/mergo"
 
 	"k8s.io/ingress-nginx/internal/ingress/annotations/canary"
+	"k8s.io/ingress-nginx/internal/ingress/annotations/disableproxyintercepterrors"
 	"k8s.io/ingress-nginx/internal/ingress/annotations/modsecurity"
 	"k8s.io/ingress-nginx/internal/ingress/annotations/opentelemetry"
 	"k8s.io/ingress-nginx/internal/ingress/annotations/proxyssl"
@@ -85,6 +86,7 @@ type Ingress struct {
 	Connection           connection.Config
 	CorsConfig           cors.Config
 	CustomHTTPErrors     []int
+	DisableProxyInterceptErrors bool
 	DefaultBackend       *apiv1.Service
 	FastCGI              fastcgi.Config
 	Denied               *string
@@ -135,6 +137,7 @@ func NewAnnotationExtractor(cfg resolver.Resolver) Extractor {
 			"Connection":           connection.NewParser(cfg),
 			"CorsConfig":           cors.NewParser(cfg),
 			"CustomHTTPErrors":     customhttperrors.NewParser(cfg),
+			"DisableProxyInterceptErrors": disableproxyintercepterrors.NewParser(cfg),
 			"DefaultBackend":       defaultbackend.NewParser(cfg),
 			"FastCGI":              fastcgi.NewParser(cfg),
 			"ExternalAuth":         authreq.NewParser(cfg),

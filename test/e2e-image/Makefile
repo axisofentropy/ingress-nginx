@@ -1,6 +1,7 @@
 
 DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 E2E_BASE_IMAGE ?= "registry.k8s.io/ingress-nginx/e2e-test-runner:v20231011-8b53cabe0@sha256:ed0dad805c635e66469b4ac376010eebdd0b3fe62d753f58db1632d6f12f451d"
+E2E_TEST_IMAGE ?= "nginx-ingress-controller:e2e"
 
 image:
 	echo "..entered Makefile in /test/e2e-image"
@@ -17,11 +18,11 @@ image:
 
 	docker build \
 		--build-arg E2E_BASE_IMAGE=$(E2E_BASE_IMAGE) \
-		--tag nginx-ingress-controller:e2e .
+		--tag $(E2E_TEST_IMAGE) .
 
 clean:
 	rm -rf _cache e2e.test kubectl cluster ginkgo
-	docker rmi -f nginx-ingress-controller:e2e || true
+	docker rmi -f $(E2E_TEST_IMAGE) || true
 
 
 .PHONY: image clean

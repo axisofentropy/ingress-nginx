@@ -23,8 +23,10 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 export NAMESPACE=$1
 export NAMESPACE_OVERLAY=$2
-export IS_CHROOT=$3
-export ENABLE_VALIDATIONS=$4
+export REPOSITORY=$3
+export TAG=$4
+export IS_CHROOT=$5
+export ENABLE_VALIDATIONS=$6
 
 echo "deploying NGINX Ingress controller in namespace $NAMESPACE"
 
@@ -63,7 +65,8 @@ if [[ ! -z "$NAMESPACE_OVERLAY" && -d "$DIR/namespace-overlays/$NAMESPACE_OVERLA
     echo "Namespace overlay $NAMESPACE_OVERLAY is being used for namespace $NAMESPACE"
     helm install nginx-ingress ${DIR}/charts/ingress-nginx \
         --namespace=$NAMESPACE \
-        --values "$DIR/namespace-overlays/$NAMESPACE_OVERLAY/values.yaml"
+        --values "$DIR/namespace-overlays/$NAMESPACE_OVERLAY/values.yaml" \
+        --set-string "controller.image.repository=$REPOSITORY,controller.image.tag=$TAG"
 else
     cat << EOF | helm install nginx-ingress ${DIR}/charts/ingress-nginx --namespace=$NAMESPACE --values -
 # TODO: remove the need to use fullnameOverride
@@ -71,9 +74,9 @@ fullnameOverride: nginx-ingress
 controller:
   enableAnnotationValidations: ${ENABLE_VALIDATIONS}
   image:
-    repository: ingress-controller/controller
+    repository: "${REPOSITORY}"
     chroot: ${IS_CHROOT}
-    tag: 1.0.0-dev
+    tag: "${TAG}"
     digest:
     digestChroot:
   scope:
@@ -84,7 +87,6 @@ controller:
     initialDelaySeconds: 3
     periodSeconds: 1
   livenessProbe:
-    initialDelaySeconds: 3
     periodSeconds: 1
   service:
     type: NodePort
@@ -104,14 +106,14 @@ controller:
   # mkdir -p /tmp/coredump
   # chmod a+rwx /tmp/coredump
   # echo "/tmp/coredump/core.%e.%p.%h.%t" > /proc/sys/kernel/core_pattern
-  extraVolumeMounts:
-    - name: coredump
-      mountPath: /tmp/coredump
+  # extraVolumeMounts:
+  #   - name: coredump
+  #     mountPath: /tmp/coredump
 
-  extraVolumes:
-    - name: coredump
-      hostPath:
-        path: /tmp/coredump
+  # extraVolumes:
+  #   - name: coredump
+  #     hostPath:
+  #       path: /tmp/coredump
 
 ${OTEL_MODULE}
 
