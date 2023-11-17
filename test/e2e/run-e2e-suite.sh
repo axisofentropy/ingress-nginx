@@ -52,10 +52,7 @@ fi
 BASEDIR=$(dirname "$0")
 NGINX_BASE_IMAGE=$(cat $BASEDIR/../../NGINX_BASE)
 HTTPBUN_IMAGE=$(cat $BASEDIR/HTTPBUN_IMAGE)
-<<<<<<< HEAD
-=======
 E2E_TEST_IMAGE="${E2E_TEST_IMAGE:-nginx-ingress-controller:e2e}"
->>>>>>> e16cb55a2 (more draft changes. TODO: more variables for `wait-for-nginx`.)
 
 echo -e "${BGREEN}Granting permissions to ingress-nginx e2e service account...${NC}"
 kubectl create serviceaccount ingress-nginx-e2e || true
