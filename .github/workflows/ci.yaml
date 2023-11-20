@@ -28,6 +28,12 @@ on:
 permissions:
   contents: read
 
+env:
+  TAG: 1.9.0-${{ github.sha }}
+  ARCH: amd64
+  REGISTRY: registry.uffizzi.com
+  E2E_TEST_IMAGE: registry.uffizzi.com/nginx-ingress-e2e:${{ github.sha }}
+
 jobs:
 
   changes:
@@ -118,19 +124,26 @@ jobs:
           sudo mv ./kubectl /usr/local/bin/kubectl
 
       - name: Build images
-        env:
-          TAG: 1.0.0-dev
-          ARCH: amd64
-          REGISTRY: ingress-controller
         run: |
           echo "building images..."
           make clean-image build image image-chroot
           make -C test/e2e-image image
 
+          echo "pushing images..."
+          docker push ${E2E_TEST_IMAGE}
+          docker push ${REGISTRY}/controller:${TAG}
+          docker push ${REGISTRY}/controller-chroot:${TAG}
+
           echo "creating images cache..."
+          docker tag ${E2E_TEST_IMAGE} nginx-ingress-controller:e2e
+          docker tag ${REGISTRY}/controller:${TAG} ingress-controller/controller:1.0.0-dev
+          docker tag ${REGISTRY}/controller-chroot:${TAG} ingress-controller/controller-chroot:1.0.0-dev
           docker save \
+            ${E2E_TEST_IMAGE} \
             nginx-ingress-controller:e2e \
+            ${REGISTRY}/controller:${TAG} \
             ingress-controller/controller:1.0.0-dev \
+            ${REGISTRY}/controller-chroot:${TAG} \
             ingress-controller/controller-chroot:1.0.0-dev \
             | gzip > docker.tar.gz
 
@@ -140,6 +153,7 @@ jobs:
           name: docker.tar.gz
           path: docker.tar.gz
           retention-days: 5
+
   helm:
     name: Helm chart
     runs-on: ubuntu-latest
@@ -223,38 +237,46 @@ jobs:
       - build
     if: |
       (needs.changes.outputs.go == 'true') || ${{ inputs.run_e2e }}
+    permissions:
+      id-token: write
+    env:
+      E2E_NODES: 14
+      SKIP: '\[Flag\]|\[Admission\]'
 
     strategy:
+      fail-fast: false
       matrix:
-        k8s: [v1.25.11, v1.26.6, v1.27.3, v1.28.0]
+        include:
+        - k8s: "1.25"
+          name: "1-25"
+        - k8s: "1.26"
+          name: "1-26"
+        - k8s: "1.27"
+          name: "1-27"
+        - k8s: "1.28"
+          name: "1-28"
 
     steps:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
-      - name: cache
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+      - name: Create Uffizzi ${{ matrix.k8s }} Cluster
+        uses: UffizziCloud/cluster-action@main
         with:
-          name: docker.tar.gz
-
-      - name: Create Kubernetes ${{ matrix.k8s }} cluster
-        id: kind
-        run: |
-          kind create cluster --image=kindest/node:${{ matrix.k8s }} --config test/e2e/kind.yaml
-
-      - name: Load images from cache
-        run: |
-          echo "loading docker images..."
-          gzip -dc docker.tar.gz | docker load
+          cluster-name: k8s-${{ matrix.name }}-${{ github.run_id }}-${{ github.run_attempt }}
+          kubeconfig: ${{ github.workspace }}/kubeconfig
+          k8s-version: ${{ matrix.k8s }}
+          server: https://app.qa-gke.uffizzi.com/
 
       - name: Run e2e tests
         env:
-          KIND_CLUSTER_NAME: kind
           SKIP_CLUSTER_CREATION: true
-          SKIP_IMAGE_CREATION: true
+          SKIP_INGRESS_IMAGE_CREATION: true
+          SKIP_E2E_IMAGE_CREATION: true
+          KUBECONFIG: ${{ github.workspace }}/kubeconfig
         run: |
-          kind get kubeconfig > $HOME/.kube/kind-config-kind
-          make kind-e2e-test
+          make uffizzi-e2e-test
+          sleep 360 # debug
 
       - name: Upload e2e junit-reports
         uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
@@ -262,6 +284,15 @@ jobs:
         with:
           name: e2e-test-reports-${{ matrix.k8s }}
           path: 'test/junitreports/report*.xml'
+
+      - name: Delete Uffizzi ${{ matrix.k8s }} Cluster
+        uses: UffizziCloud/cluster-action@main
+        if: always()
+        timeout-minutes: 15
+        with:
+          cluster-name: k8s-${{ matrix.name }}-${{ github.run_id }}-${{ github.run_attempt }}
+          action: delete
+          server: https://app.qa-gke.uffizzi.com/
 
   kubernetes-validations:
     name: Kubernetes with Validations
@@ -271,39 +302,47 @@ jobs:
       - build
     if: |
       (needs.changes.outputs.go == 'true') || ${{ inputs.run_e2e }}
+    permissions:
+      id-token: write
+    env:
+      E2E_NODES: 14
+      SKIP: '\[Flag\]|\[Admission\]'
 
     strategy:
+      fail-fast: false
       matrix:
-        k8s: [v1.25.11, v1.26.6, v1.27.3, v1.28.0]
+        include:
+        - k8s: "1.25"
+          name: "1-25"
+        - k8s: "1.26"
+          name: "1-26"
+        - k8s: "1.27"
+          name: "1-27"
+        - k8s: "1.28"
+          name: "1-28"
 
     steps:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
-      - name: cache
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+      - name: Create Uffizzi ${{ matrix.k8s }} Cluster
+        uses: UffizziCloud/cluster-action@main
         with:
-          name: docker.tar.gz
-
-      - name: Create Kubernetes ${{ matrix.k8s }} cluster
-        id: kind
-        run: |
-          kind create cluster --image=kindest/node:${{ matrix.k8s }} --config test/e2e/kind.yaml
-
-      - name: Load images from cache
-        run: |
-          echo "loading docker images..."
-          gzip -dc docker.tar.gz | docker load
+          cluster-name: k8s-validations-${{ matrix.name }}-${{ github.run_id }}-${{ github.run_attempt }}
+          kubeconfig: ${{ github.workspace }}/kubeconfig
+          k8s-version: ${{ matrix.k8s }}
+          server: https://app.qa-gke.uffizzi.com/
 
       - name: Run e2e tests
         env:
-          KIND_CLUSTER_NAME: kind
           SKIP_CLUSTER_CREATION: true
-          SKIP_IMAGE_CREATION: true
+          SKIP_INGRESS_IMAGE_CREATION: true
+          SKIP_E2E_IMAGE_CREATION: true
+          KUBECONFIG: ${{ github.workspace }}/kubeconfig
           ENABLE_VALIDATIONS: true
         run: |
-          kind get kubeconfig > $HOME/.kube/kind-config-kind
-          make kind-e2e-test
+          make uffizzi-e2e-test
+          sleep 360 # debug
 
       - name: Upload e2e junit-reports
         uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
@@ -312,6 +351,14 @@ jobs:
           name: e2e-test-reports-${{ matrix.k8s }}
           path: 'test/junitreports/report*.xml'
 
+      - name: Delete Uffizzi ${{ matrix.k8s }} Cluster
+        uses: UffizziCloud/cluster-action@main
+        if: always()
+        timeout-minutes: 15
+        with:
+          cluster-name: k8s-validations-${{ matrix.name }}-${{ github.run_id }}-${{ github.run_attempt }}
+          action: delete
+          server: https://app.qa-gke.uffizzi.com/
 
   kubernetes-chroot:
     name: Kubernetes chroot
@@ -345,12 +392,15 @@ jobs:
         run: |
           echo "loading docker images..."
           gzip -dc docker.tar.gz | docker load
+          docker tag ${REGISTRY}/controller-chroot:${TAG} ${REGISTRY}/controller:${TAG}
 
       - name: Run e2e tests
         env:
           KIND_CLUSTER_NAME: kind
           SKIP_CLUSTER_CREATION: true
           SKIP_IMAGE_CREATION: true
+          SKIP_INGRESS_IMAGE_CREATION: true
+          SKIP_E2E_IMAGE_CREATION: true
           IS_CHROOT: true
         run: |
           kind get kubeconfig > $HOME/.kube/kind-config-kind
@@ -509,4 +559,3 @@ jobs:
         if: ${{ steps.filter-images.outputs.kube-webhook-certgen == 'true' }}
         run: |
           cd images/kube-webhook-certgen && make test test-e2e
-

@@ -52,6 +52,7 @@ fi
 BASEDIR=$(dirname "$0")
 NGINX_BASE_IMAGE=$(cat $BASEDIR/../../NGINX_BASE)
 HTTPBUN_IMAGE=$(cat $BASEDIR/HTTPBUN_IMAGE)
+E2E_TEST_IMAGE="${E2E_TEST_IMAGE:-nginx-ingress-controller:e2e}"
 
 echo -e "${BGREEN}Granting permissions to ingress-nginx e2e service account...${NC}"
 kubectl create serviceaccount ingress-nginx-e2e || true
@@ -72,18 +73,35 @@ fi
 
 echo -e "Starting the e2e test pod"
 
-kubectl run --rm \
-  --attach \
+set -x
+kubectl run \
   --restart=Never \
   --env="E2E_NODES=${E2E_NODES}" \
   --env="FOCUS=${FOCUS}" \
-  --env="IS_CHROOT=${IS_CHROOT:-false}"\
-  --env="ENABLE_VALIDATIONS=${ENABLE_VALIDATIONS:-false}"\
+  --env="SKIP=${SKIP}" \
+  --env="IS_CHROOT=${IS_CHROOT:-false}" \
+  --env="REPOSITORY=${REPOSITORY:-ingress-controller}" \
+  --env="TAG=${TAG:-1.0.0-dev}" \
+  --env="ENABLE_VALIDATIONS=${ENABLE_VALIDATIONS:-false}" \
   --env="E2E_CHECK_LEAKS=${E2E_CHECK_LEAKS}" \
   --env="NGINX_BASE_IMAGE=${NGINX_BASE_IMAGE}" \
   --env="HTTPBUN_IMAGE=${HTTPBUN_IMAGE}" \
-  --overrides='{ "apiVersion": "v1", "spec":{"serviceAccountName": "ingress-nginx-e2e"}}' \
-  e2e --image=nginx-ingress-controller:e2e
+  --override-type="strategic" \
+  --overrides='{ "apiVersion": "v1", "spec":{"serviceAccountName": "ingress-nginx-e2e", "containers":[{"name": "e2e", "resources": {"limits":{"cpu": 4, "memory": "12288Mi"}, "requests":{"cpu": 1, "memory": "4096Mi"}}}]}}' \
+  --image-pull-policy="Always" \
+  --v=2 \
+  --image="${E2E_TEST_IMAGE}" \
+  e2e
+set +x
+echo kubectl run exit code $?
+
+kubectl wait --for=condition=ready=true pod/e2e --timeout=10m --v=2
+echo e2e Pod Ready
+kubectl wait --for=condition=ready=false pod/e2e --timeout=2h --v=2
+echo e2e Pod Unready
+
+echo dumping logs from e2e test runner Pod:
+kubectl logs e2e
 
 # Get the junit-reports stored in the configMaps created during e2etests
 echo "Getting the report file out now.."
