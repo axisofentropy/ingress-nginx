@@ -241,7 +241,7 @@ jobs:
       id-token: write
     env:
       E2E_NODES: 10
-      SKIP: '\\[Flag\\]'
+      SKIP: '\[Flag\]'
 
     strategy:
       fail-fast: false
@@ -306,7 +306,7 @@ jobs:
       id-token: write
     env:
       E2E_NODES: 10
-      SKIP: '\\[Flag\\]'
+      SKIP: '\[Flag\]'
 
     strategy:
       fail-fast: false
