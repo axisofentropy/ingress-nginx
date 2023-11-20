@@ -240,7 +240,7 @@ jobs:
     permissions:
       id-token: write
     env:
-      E2E_NODES: 35
+      E2E_NODES: 14
       SKIP: '\[Flag\]'
 
     strategy:
@@ -305,7 +305,7 @@ jobs:
     permissions:
       id-token: write
     env:
-      E2E_NODES: 35
+      E2E_NODES: 14
       SKIP: '\[Flag\]'
 
     strategy:
